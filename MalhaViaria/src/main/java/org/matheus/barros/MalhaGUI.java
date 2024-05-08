@@ -7,17 +7,19 @@ import java.util.Random;
 
 public class MalhaGUI extends JFrame {
     private Malha malha;
-    private int larguraCelula = 50;
-    private int alturaCelula = 50;
+    private int larguraCelula = 40;
+    private int alturaCelula = 40;
     private int larguraMalha;
     private int alturaMalha;
-    private JPanel panel;
+    private JPanel painel;
     private Random random;
     private int maxVeiculos;
     private boolean simulacaoRodando;
+
     private ArrayList<Veiculo> veiculos;
 
-    private JButton iniciarButton;
+    private JButton addVeiculos;
+    private JButton iniciarSimulacao;
     private JTextField quantidadeVeiculosField;
 
     public MalhaGUI(Malha malha) {
@@ -26,33 +28,31 @@ public class MalhaGUI extends JFrame {
         alturaMalha = malha.getLinhas() * alturaCelula;
 
         setTitle("Simulador de Tráfego");
-        setSize(larguraMalha, alturaMalha + 50); // Adicionando espaço para os botões
+        setSize(larguraMalha + 100, alturaMalha + 100); // Adicionando espaço para os botões
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setResizable(false);
+        setResizable(true);
 
-        panel = new JPanel() {
+        painel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 desenharMalha(g);
-                desenharVeiculos(g); // Desenha os veículos toda vez que a malha é redesenhada
+                desenharVeiculos(g);
             }
         };
 
-        panel.setPreferredSize(new Dimension(larguraMalha, alturaMalha));
-        add(panel);
+        painel.setPreferredSize(new Dimension(larguraMalha, alturaMalha));
+        add(painel);
 
         random = new Random();
-        maxVeiculos = 10;
         simulacaoRodando = false;
         veiculos = new ArrayList<>();
 
         // Adicionando botões e inputs
-        JPanel controlPanel = new JPanel();
-        iniciarButton = new JButton("Iniciar");
-        iniciarButton.addActionListener(e -> iniciarSimulacao());
-        controlPanel.add(iniciarButton);
+        JPanel controlPanel = new JPanel(new FlowLayout());
+        iniciarSimulacao = new JButton("Iniciar Simulação");
+        iniciarSimulacao.addActionListener(e -> iniciarSimulacao());
+        controlPanel.add(iniciarSimulacao);
         quantidadeVeiculosField = new JTextField("10", 5); // Valor padrão de 10 veículos
         controlPanel.add(new JLabel("Quantidade de Veículos:"));
         controlPanel.add(quantidadeVeiculosField);
@@ -60,78 +60,20 @@ public class MalhaGUI extends JFrame {
 
         // Chamando setVisible dentro de SwingUtilities.invokeLater para garantir que seja executado na EDT
         SwingUtilities.invokeLater(() -> setVisible(true));
+
+        // Adicionando um Timer para atualizar a interface gráfica periodicamente
+        Timer timer = new Timer(1, e -> repaint());
+        timer.start();
     }
 
     private void desenharVeiculos(Graphics g) {
         for (Veiculo veiculo : veiculos) {
-            desenharVeiculo(g, veiculo.getLinhaAtual(), veiculo.getColunaAtual());
-        }
-    }
-
-    private void desenharVeiculo(Graphics g, int linha, int coluna) {
-        int x = coluna * larguraCelula;
-        int y = linha * alturaCelula;
-        g.setColor(Color.RED);
-        g.fillOval(x, y, larguraCelula, alturaCelula);
-    }
-
-    public void iniciarSimulacao() {
-        try {
-            maxVeiculos = Integer.parseInt(quantidadeVeiculosField.getText());
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Digite um número válido para a quantidade de veículos.", "Erro", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        simulacaoRodando = true;
-        while (simulacaoRodando) {
-            if (veiculos.size() < maxVeiculos) {
-                inserirVeiculo();
-            }
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void inserirVeiculo() {
-        int linha;
-        int coluna;
-
-        int borda = random.nextInt(4);
-
-        switch (borda) {
-            case 0:
-                linha = 0;
-                coluna = random.nextInt(malha.getColunas());
-                break;
-            case 1:
-                linha = random.nextInt(malha.getLinhas());
-                coluna = malha.getColunas() - 1;
-                break;
-            case 2:
-                linha = malha.getLinhas() - 1;
-                coluna = random.nextInt(malha.getColunas());
-                break;
-            case 3:
-                linha = random.nextInt(malha.getLinhas());
-                coluna = 0;
-                break;
-            default:
-                linha = 0;
-                coluna = 0;
-        }
-
-        if (malha.getTipoSegmento(linha, coluna) >= 1 && malha.getTipoSegmento(linha, coluna) <= 4) {
-            Veiculo veiculo = new Veiculo(malha, linha, coluna , this);
-            System.out.println(veiculo.getName());
-            veiculos.add(veiculo);
-            veiculo.start(); // Inicia a thread do veículo
-        } else {
-            inserirVeiculo();
-
+            int linha = veiculo.getLinhaAtual();
+            int coluna = veiculo.getColunaAtual();
+            int x = coluna * larguraCelula;
+            int y = linha * alturaCelula;
+            g.setColor(Color.RED);
+            g.fillOval(x, y, larguraCelula, alturaCelula);
         }
     }
 
@@ -142,17 +84,17 @@ public class MalhaGUI extends JFrame {
                 Color cor;
                 switch (tipo) {
                     case 0:
-                        cor = Color.black;
+                        cor = Color.BLACK;
                         break;
                     case 1:
-                        cor = Color.blue;
+                        cor = Color.BLUE;
                         break;
                     case 2:
                     case 3:
-                        cor = Color.green;
+                        cor = Color.GREEN;
                         break;
                     case 4:
-                        cor = Color.pink;
+                        cor = Color.PINK;
                         break;
                     default:
                         cor = Color.WHITE;
@@ -164,6 +106,65 @@ public class MalhaGUI extends JFrame {
             }
         }
     }
+
+
+
+    public void iniciarSimulacao() {
+        if (simulacaoRodando) {
+            return;
+        }
+        try {
+            maxVeiculos = Integer.parseInt(quantidadeVeiculosField.getText());
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Digite um número válido para a quantidade de veículos.", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        simulacaoRodando = true;
+
+        // Inicie a simulação em uma nova thread para não bloquear a EDT
+        new Thread(() -> {
+            while (simulacaoRodando) {
+                if (veiculos.size() < maxVeiculos) {
+                    inserirVeiculo();
+                    SwingUtilities.invokeLater(() -> repaint()); // Redesenha a interface gráfica após adicionar um novo veículo
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    private void inserirVeiculo() {
+        ArrayList<Point> posicoesValidas = new ArrayList<>();
+        // Itera sobre todas as posições da malha
+        for (int i = 0; i < malha.getLinhas(); i++) {
+            for (int j = 0; j < malha.getColunas(); j++) {
+                // Verifica se a posição está livre e não é uma área proibida (tipo 0)
+                if (malha.posicaoEstaLivre(i, j) && malha.ehPontoDeEntrada(i, j)) {
+                    posicoesValidas.add(new Point(i, j)); // Adiciona a posição válida à lista
+                }
+            }
+        }
+        // Verifica se existem posições válidas disponíveis
+        if (!posicoesValidas.isEmpty()) {
+            // Escolhe aleatoriamente uma das posições válidas disponíveis
+            Point posicaoSelecionada = posicoesValidas.get(random.nextInt(posicoesValidas.size()));
+            int linha = posicaoSelecionada.x;
+            int coluna = posicaoSelecionada.y;
+
+            // Cria o veículo na posição selecionada
+            Veiculo veiculo = new Veiculo(malha, linha, coluna, this, random.nextInt(1000)); // Velocidade aleatória
+            veiculos.add(veiculo);
+
+            // Inicia a thread do veículo na EDT
+            SwingUtilities.invokeLater(veiculo::start);
+        }
+    }
+
 
     public static void main(String[] args) {
         Malha malha = new Malha("src/main/java/org/matheus/barros/malha.txt");

@@ -161,9 +161,9 @@ public class MalhaGUI extends JFrame {
                     SwingUtilities.invokeLater(this::repaint); // Redesenha a interface gráfica após adicionar um novo veículo
                 }
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(1000); // Atraso de 1 segundo antes de adicionar outro veículo
                 } catch (InterruptedException e) {
-                    e.notify();
+                    e.printStackTrace();
                 }
             }
         }).start();
@@ -201,7 +201,7 @@ public class MalhaGUI extends JFrame {
             int coluna = posicaoSelecionada.y;
 
             // Cria o veículo na posição selecionada
-            Veiculo veiculo = new Veiculo(malha, linha, coluna, this, random.nextInt(1000), new Color((int) (Math.random() * 0x1000000))); // Velocidade aleatória
+            Veiculo veiculo = new Veiculo(malha, linha, coluna, this, random.nextInt(1000), new Color((int) (Math.random() * 0x1000000)),new SemaforoCruzamento()); // Velocidade aleatória
             veiculos.add(veiculo);
 
             // Inicia a thread do veículo na EDT

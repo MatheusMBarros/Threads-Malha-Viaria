@@ -1,9 +1,5 @@
 package org.matheus.barros;
 
-import org.matheus.barros.MalhaGUI;
-import org.matheus.barros.Malha;
-
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.Random;
@@ -34,13 +30,13 @@ public class Veiculo extends Thread {
 
     @Override
     public void run() {
-        while (true) {
+        while (!isInterrupted() && gui.isSimulacaoRodando()) {
             try {
                 Thread.sleep(velocidade > 0 ? velocidade : 1); // Garante que o tempo de espera seja sempre positivo
                 mover();
-                //SwingUtilities.invokeLater(gui::repaint);
+                SwingUtilities.invokeLater(gui::repaint);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                e.notifyAll();
             }
         }
     }
@@ -71,25 +67,19 @@ public class Veiculo extends Thread {
         }
 
         // Verifica se a próxima posição é válida
-        if (malha.ehPosicaoValida(proximaLinha, proximaColuna)) {
+        if (gui.posicaoEstaLivre(proximaLinha, proximaColuna)) {
             // Verifica se a próxima posição é uma via
             int tipoSegmentoProximo = malha.getTipoSegmento(proximaLinha, proximaColuna);
-            System.out.println("----------------");
             if (tipoSegmentoProximo >= 1 && tipoSegmentoProximo <= 4) {
                 // Move o veículo para a próxima posição
-                System.out.println(linhaAtual);
-                System.out.println(colunaAtual);
                 linhaAtual = proximaLinha;
                 colunaAtual = proximaColuna;
-                System.out.println(linhaAtual);
-                System.out.println(colunaAtual);
-                System.out.println("----------------");
             }
         }
 
         // Atualiza a direção do veículo se necessário
         if (malha.getTipoSegmento(linhaAtual, colunaAtual) >= 5) {
-            boolean[] saidasDisponiveis = malha.getSaidasDisponiveis(linhaAtual, colunaAtual);
+            boolean[] saidasDisponiveis = malha.getDirecoesDisponiveis(linhaAtual, colunaAtual);
             for (int i = 0; i < DIRECOES.length; i++) {
                 if (saidasDisponiveis[i]) {
                     direcao = i;
@@ -101,7 +91,7 @@ public class Veiculo extends Thread {
 
     private int escolherDirecaoInicial() {
         // Determina a direção inicial com base nas saídas disponíveis na posição atual
-        boolean[] saidasDisponiveis = malha.getSaidasDisponiveis(linhaAtual, colunaAtual);
+        boolean[] saidasDisponiveis = malha.getDirecoesDisponiveis(linhaAtual, colunaAtual);
         for (int i = 0; i < DIRECOES.length; i++) {
             if (saidasDisponiveis[i]) {
                 return i;
@@ -118,7 +108,4 @@ public class Veiculo extends Thread {
         return linhaAtual;
     }
 
-    public int getVelocidade() {
-        return this.velocidade;
-    }
 }

@@ -3,6 +3,7 @@ package org.matheus.barros;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class Malha {
     private int[][] segmentos;
@@ -60,26 +61,21 @@ public class Malha {
     }
 
     public boolean ehPosicaoValida(int linha, int coluna) {
-        System.out.println(linha);
-        System.out.println(linhas);
-        System.out.println(coluna);
-        System.out.println(colunas);
-        System.out.println("---------");
-        return linha >= 0 && linha < linhas && coluna >= 0 && coluna < colunas;
+        return (linha >= 0 && linha < linhas && coluna >= 0 && coluna < colunas) && segmentos[linha][coluna] != 0;
     }
 
-    public boolean[] getSaidasDisponiveis(int linha, int coluna) {
+    public boolean[] getDirecoesDisponiveis(int linha, int coluna) {
         boolean[] saidas = new boolean[4]; // Representa as direções: cima, direita, baixo, esquerda
 
         // Verifica se a posição está em uma borda da malha
         if (linha == 0) // Borda superior
-            saidas[0] = true;
-        if (linha == getLinhas() - 1) // Borda inferior
             saidas[2] = true;
+        if (linha == getLinhas() - 1) // Borda inferior
+            saidas[0] = true;
         if (coluna == 0) // Borda esquerda
-            saidas[3] = true;
-        if (coluna == getColunas() - 1) // Borda direita
             saidas[1] = true;
+        if (coluna == getColunas() - 1) // Borda direita
+            saidas[3] = true;
 
         // Verifica se a posição é um cruzamento com saídas disponíveis
         int tipoSegmento = getTipoSegmento(linha, coluna);
@@ -115,9 +111,6 @@ public class Malha {
         }
 
         return saidas;
-    }
-    public boolean posicaoEstaLivre(int linha, int coluna) {
-        return ehPosicaoValida(linha, coluna) && segmentos[linha][coluna] != 0;
     }
 
 }

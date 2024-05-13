@@ -3,6 +3,7 @@ package org.matheus.barros;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
 
 public class MalhaGUI extends JFrame {
@@ -132,18 +133,25 @@ public class MalhaGUI extends JFrame {
             while (simulacaoRodando) {
                 if (veiculos.size() < maxVeiculos) {
                     inserirVeiculo();
-                    SwingUtilities.invokeLater(() -> repaint()); // Redesenha a interface gráfica após adicionar um novo veículo
+                    SwingUtilities.invokeLater(this::repaint); // Redesenha a interface gráfica após adicionar um novo veículo
                 }
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    e.notify();
                 }
             }
         }).start();
     }
 
     public void terminarSimulacao(){
+        Iterator<Veiculo> iterator = veiculos.iterator();
+        while (iterator.hasNext()) {
+            Veiculo veiculo = iterator.next();
+            veiculo.interrupt();
+            iterator.remove();
+        }
+        simulacaoRodando = false;
     }
 
     private void inserirVeiculo() {
@@ -152,7 +160,7 @@ public class MalhaGUI extends JFrame {
         for (int i = 0; i < malha.getLinhas(); i++) {
             for (int j = 0; j < malha.getColunas(); j++) {
                 // Verifica se a posição está livre e não é uma área proibida (tipo 0)
-                if (malha.posicaoEstaLivre(i, j) && malha.ehPontoDeEntrada(i, j)) {
+                if (posicaoEstaLivre(i, j) && malha.ehPontoDeEntrada(i, j)) {
                     posicoesValidas.add(new Point(i, j)); // Adiciona a posição válida à lista
                 }
             }
@@ -173,9 +181,21 @@ public class MalhaGUI extends JFrame {
         }
     }
 
-
     public static void main(String[] args) {
-        Malha malha = new Malha("C:\\Users\\AVLip\\Documents\\DEV\\Threads-Malha-Viaria\\MalhaViaria\\src\\main\\java\\org\\matheus\\barros\\malha-exemplo-1.txt");
+        Malha malha = new Malha("C:\\Users\\AVLip\\Documents\\DEV\\Threads-Malha-Viaria\\MalhaViaria\\src\\malhas\\malha-exemplo-1.txt");
         MalhaGUI gui = new MalhaGUI(malha);
+    }
+
+    public boolean posicaoEstaLivre(int linha, int coluna) {
+        for(Veiculo veiculo : veiculos){
+            if(veiculo.getLinhaAtual() == linha && veiculo.getColunaAtual() == coluna) {
+                return false;
+            }
+        }
+        return malha.ehPosicaoValida(linha, coluna);
+    }
+
+    public boolean isSimulacaoRodando(){
+        return simulacaoRodando;
     }
 }

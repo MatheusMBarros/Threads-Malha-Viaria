@@ -18,8 +18,8 @@ public class MalhaGUI extends JFrame {
 
     private ArrayList<Veiculo> veiculos;
 
-    private JButton addVeiculos;
     private JButton iniciarSimulacao;
+    private JButton terminarSimulacao;
     private JTextField quantidadeVeiculosField;
 
     public MalhaGUI(Malha malha) {
@@ -28,16 +28,16 @@ public class MalhaGUI extends JFrame {
         alturaMalha = malha.getLinhas() * alturaCelula;
 
         setTitle("Simulador de Tráfego");
-        setSize(larguraMalha + 100, alturaMalha + 100); // Adicionando espaço para os botões
+        setSize(larguraMalha + 16, alturaMalha + 100); // Adicionando espaço para os botões
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setResizable(true);
+        setResizable(false);
 
         painel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                desenharMalha(g);
-                desenharVeiculos(g);
+            super.paintComponent(g);
+            desenharMalha(g);
+            desenharVeiculos(g);
             }
         };
 
@@ -46,23 +46,30 @@ public class MalhaGUI extends JFrame {
 
         random = new Random();
         simulacaoRodando = false;
-        veiculos = new ArrayList<>();
+        veiculos = new ArrayList<Veiculo>();
 
         // Adicionando botões e inputs
         JPanel controlPanel = new JPanel(new FlowLayout());
+
         iniciarSimulacao = new JButton("Iniciar Simulação");
         iniciarSimulacao.addActionListener(e -> iniciarSimulacao());
         controlPanel.add(iniciarSimulacao);
+
+        terminarSimulacao = new JButton("Terminar Simulação");
+        terminarSimulacao.addActionListener(e -> terminarSimulacao());
+        controlPanel.add(terminarSimulacao);
+
         quantidadeVeiculosField = new JTextField("10", 5); // Valor padrão de 10 veículos
         controlPanel.add(new JLabel("Quantidade de Veículos:"));
         controlPanel.add(quantidadeVeiculosField);
+
         add(controlPanel, BorderLayout.SOUTH);
 
         // Chamando setVisible dentro de SwingUtilities.invokeLater para garantir que seja executado na EDT
         SwingUtilities.invokeLater(() -> setVisible(true));
 
         // Adicionando um Timer para atualizar a interface gráfica periodicamente
-        Timer timer = new Timer(1, e -> repaint());
+        Timer timer = new Timer(1000, e -> repaint());
         timer.start();
     }
 
@@ -72,7 +79,7 @@ public class MalhaGUI extends JFrame {
             int coluna = veiculo.getColunaAtual();
             int x = coluna * larguraCelula;
             int y = linha * alturaCelula;
-            g.setColor(Color.RED);
+            g.setColor(veiculo.getCor());
             g.fillOval(x, y, larguraCelula, alturaCelula);
         }
     }
@@ -107,8 +114,6 @@ public class MalhaGUI extends JFrame {
         }
     }
 
-
-
     public void iniciarSimulacao() {
         if (simulacaoRodando) {
             return;
@@ -138,6 +143,9 @@ public class MalhaGUI extends JFrame {
         }).start();
     }
 
+    public void terminarSimulacao(){
+    }
+
     private void inserirVeiculo() {
         ArrayList<Point> posicoesValidas = new ArrayList<>();
         // Itera sobre todas as posições da malha
@@ -157,7 +165,7 @@ public class MalhaGUI extends JFrame {
             int coluna = posicaoSelecionada.y;
 
             // Cria o veículo na posição selecionada
-            Veiculo veiculo = new Veiculo(malha, linha, coluna, this, random.nextInt(1000)); // Velocidade aleatória
+            Veiculo veiculo = new Veiculo(malha, linha, coluna, this, random.nextInt(1000), new Color((int) (Math.random() * 0x1000000))); // Velocidade aleatória
             veiculos.add(veiculo);
 
             // Inicia a thread do veículo na EDT
@@ -167,7 +175,7 @@ public class MalhaGUI extends JFrame {
 
 
     public static void main(String[] args) {
-        Malha malha = new Malha("src/main/java/org/matheus/barros/malha.txt");
+        Malha malha = new Malha("C:\\Users\\AVLip\\Documents\\DEV\\Threads-Malha-Viaria\\MalhaViaria\\src\\main\\java\\org\\matheus\\barros\\malha-exemplo-1.txt");
         MalhaGUI gui = new MalhaGUI(malha);
     }
 }

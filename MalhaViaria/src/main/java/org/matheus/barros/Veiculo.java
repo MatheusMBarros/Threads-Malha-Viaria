@@ -5,6 +5,7 @@ import org.matheus.barros.Malha;
 
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
 
@@ -14,12 +15,13 @@ public class Veiculo extends Thread {
     private int linhaAtual;
     private int colunaAtual;
     private int direcao;
+    private Color cor;
     private Random random;
     private MalhaGUI gui;
     private static final Semaphore semaforoCruzamento = new Semaphore(1);
     private int velocidade;
 
-    public Veiculo(Malha malha, int linha, int coluna, MalhaGUI gui, int velocidade) {
+    public Veiculo(Malha malha, int linha, int coluna, MalhaGUI gui, int velocidade, Color cor) {
         this.malha = malha;
         this.linhaAtual = linha;
         this.colunaAtual = coluna;
@@ -27,6 +29,7 @@ public class Veiculo extends Thread {
         this.random = new Random();
         this.gui = gui;
         this.velocidade = velocidade;
+        this.cor = cor;
     }
 
     @Override
@@ -35,11 +38,15 @@ public class Veiculo extends Thread {
             try {
                 Thread.sleep(velocidade > 0 ? velocidade : 1); // Garante que o tempo de espera seja sempre positivo
                 mover();
-                SwingUtilities.invokeLater(gui::repaint);
+                //SwingUtilities.invokeLater(gui::repaint);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    public Color getCor(){
+        return this.cor;
     }
 
     public void mover() {
@@ -67,10 +74,16 @@ public class Veiculo extends Thread {
         if (malha.ehPosicaoValida(proximaLinha, proximaColuna)) {
             // Verifica se a próxima posição é uma via
             int tipoSegmentoProximo = malha.getTipoSegmento(proximaLinha, proximaColuna);
+            System.out.println("----------------");
             if (tipoSegmentoProximo >= 1 && tipoSegmentoProximo <= 4) {
                 // Move o veículo para a próxima posição
+                System.out.println(linhaAtual);
+                System.out.println(colunaAtual);
                 linhaAtual = proximaLinha;
                 colunaAtual = proximaColuna;
+                System.out.println(linhaAtual);
+                System.out.println(colunaAtual);
+                System.out.println("----------------");
             }
         }
 
@@ -84,15 +97,6 @@ public class Veiculo extends Thread {
                 }
             }
         }
-    }
-
-
-    private void setColunaAtual(int colunaAtual) {
-        this.colunaAtual = colunaAtual;
-    }
-
-    private void setLinhaAtual(int linhaAtual) {
-        this.linhaAtual = linhaAtual;
     }
 
     private int escolherDirecaoInicial() {

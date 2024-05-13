@@ -44,16 +44,27 @@ public class Malha {
 
     public boolean ehPontoDeEntrada(int linha, int coluna) {
         // Verifica se a posição está em uma borda da malha e se não é uma área proibida (tipo 0)
-        return (linha == 0 || linha == getLinhas() - 1 || coluna == 0 || coluna == getColunas() - 1) && segmentos[linha][coluna] != 0;
+        return ((linha == 0 && this.getTipoSegmento(linha, coluna) == 3) ||
+                (linha == getLinhas() - 1 && this.getTipoSegmento(linha, coluna) == 1) ||
+                (coluna == 0 && this.getTipoSegmento(linha, coluna) == 2) ||
+                (coluna == getColunas() - 1 && this.getTipoSegmento(linha, coluna) == 4)) ;
     }
 
 
     public boolean ehPontoDeSaida(int linha, int coluna) {
         // Verifica se a posição está em uma borda da malha
-        return (linha == 0 || linha == getLinhas() - 1 || coluna == 0 || coluna == getColunas() - 1);
+        return ((linha == 0 && this.getTipoSegmento(linha, coluna) == 1) ||
+                (linha == getLinhas() - 1 && this.getTipoSegmento(linha, coluna) == 3) ||
+                (coluna == 0 && this.getTipoSegmento(linha, coluna) == 4) ||
+                (coluna == getColunas() - 1 && this.getTipoSegmento(linha, coluna) == 2)) ;
     }
 
     public boolean ehPosicaoValida(int linha, int coluna) {
+        System.out.println(linha);
+        System.out.println(linhas);
+        System.out.println(coluna);
+        System.out.println(colunas);
+        System.out.println("---------");
         return linha >= 0 && linha < linhas && coluna >= 0 && coluna < colunas;
     }
 
@@ -108,7 +119,5 @@ public class Malha {
     public boolean posicaoEstaLivre(int linha, int coluna) {
         return ehPosicaoValida(linha, coluna) && segmentos[linha][coluna] != 0;
     }
-    public static void main(String[] args) {
-        Malha malha = new Malha("src/main/java/org/matheus/barros/malha.txt");
-    }
+
 }

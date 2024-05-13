@@ -2,6 +2,7 @@ package org.matheus.barros;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
 
@@ -14,8 +15,10 @@ public class Veiculo extends Thread {
     private Color cor;
     private Random random;
     private MalhaGUI gui;
-    private static final Semaphore semaforoCruzamento = new Semaphore(1);
+    private static Semaforo semaforoCruzamento = new Semaforo();
     private int velocidade;
+
+
 
     public Veiculo(Malha malha, int linha, int coluna, MalhaGUI gui, int velocidade, Color cor) {
         this.malha = malha;
@@ -33,7 +36,6 @@ public class Veiculo extends Thread {
         while (!isInterrupted() && gui.isSimulacaoRodando()) {
             try {
                 Thread.sleep(velocidade > 0 ? velocidade : 1); // Garante que o tempo de espera seja sempre positivo
-                mover();
                 SwingUtilities.invokeLater(gui::repaint);
             } catch (InterruptedException e) {
                 e.notifyAll();
@@ -87,6 +89,21 @@ public class Veiculo extends Thread {
                 }
             }
         }
+
+        //Cruzamento
+        if (malha.getTipoSegmento(linhaAtual, colunaAtual) >= 9 && malha.getTipoSegmento(linhaAtual, colunaAtual)  <= 12) {
+            boolean[] saidasDisponiveis = malha.getDirecoesDisponiveis(linhaAtual, colunaAtual);
+            for (int i = 0; i < DIRECOES.length; i++) {
+                if (saidasDisponiveis[i]) {
+                    direcao = i;
+                    break;
+                }
+            }
+        }
+
+
+
+
     }
 
     private int escolherDirecaoInicial() {
@@ -109,3 +126,5 @@ public class Veiculo extends Thread {
     }
 
 }
+
+

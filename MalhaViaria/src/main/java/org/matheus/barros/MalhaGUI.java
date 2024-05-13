@@ -21,6 +21,9 @@ public class MalhaGUI extends JFrame {
 
     private JButton iniciarSimulacao;
     private JButton terminarSimulacao;
+    private JButton simulaSemaforo;
+    private JButton simulaMonitor;
+
     private JTextField quantidadeVeiculosField;
 
     public MalhaGUI(Malha malha) {
@@ -60,6 +63,17 @@ public class MalhaGUI extends JFrame {
         terminarSimulacao.addActionListener(e -> terminarSimulacao());
         controlPanel.add(terminarSimulacao);
 
+
+        simulaSemaforo = new JButton("Semaforo");
+        simulaSemaforo.addActionListener(e -> usaSemaforo());
+        controlPanel.add(simulaSemaforo);
+
+        simulaMonitor = new JButton("Monitor");
+        simulaMonitor.addActionListener(e -> usaMonitor());
+        controlPanel.add(simulaMonitor);
+
+
+
         quantidadeVeiculosField = new JTextField("10", 5); // Valor padrão de 10 veículos
         controlPanel.add(new JLabel("Quantidade de Veículos:"));
         controlPanel.add(quantidadeVeiculosField);
@@ -72,6 +86,17 @@ public class MalhaGUI extends JFrame {
         // Adicionando um Timer para atualizar a interface gráfica periodicamente
         Timer timer = new Timer(1000, e -> repaint());
         timer.start();
+    }
+
+    private String usaMonitor() {
+        simulaSemaforo.setEnabled(false);
+
+        return "Strinf";
+    }
+
+    private String usaSemaforo() {
+        simulaMonitor.setEnabled(false);
+        return "Strinf";
     }
 
     private void desenharVeiculos(Graphics g) {
@@ -152,6 +177,9 @@ public class MalhaGUI extends JFrame {
             iterator.remove();
         }
         simulacaoRodando = false;
+        simulaMonitor.setEnabled(true);
+        simulaSemaforo.setEnabled(true);
+
     }
 
     private void inserirVeiculo() {
@@ -182,7 +210,7 @@ public class MalhaGUI extends JFrame {
     }
 
     public static void main(String[] args) {
-        Malha malha = new Malha("C:\\Users\\AVLip\\Documents\\DEV\\Threads-Malha-Viaria\\MalhaViaria\\src\\malhas\\malha-exemplo-1.txt");
+        Malha malha = new Malha("src/main/java/org/matheus/barros/malha.txt");
         MalhaGUI gui = new MalhaGUI(malha);
     }
 

@@ -21,8 +21,11 @@ public class MalhaGUI extends JFrame {
 
     private JButton iniciarSimulacao;
     private JButton terminarSimulacao;
-    private JButton simulaSemaforo;
+    private JButton simulaSemaphore;
     private JButton simulaMonitor;
+
+    protected boolean onSemaphore;
+    protected boolean onMonitor;
 
     private JTextField quantidadeVeiculosField;
 
@@ -32,11 +35,11 @@ public class MalhaGUI extends JFrame {
         alturaMalha = malha.getLinhas() * alturaCelula;
 
         setTitle("Simulador de Tráfego");
-        setSize(larguraMalha + 16, alturaMalha + 100); // Adicionando espaço para os botões
+        setSize(larguraMalha + 100, alturaMalha + 100); // Adicionando espaço para os botões
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
 
-        painel = new JPanel() {
+        painel = new JPanel(new FlowLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -45,8 +48,8 @@ public class MalhaGUI extends JFrame {
             }
         };
 
-        painel.setPreferredSize(new Dimension(larguraMalha, alturaMalha));
-        add(painel);
+        painel.setPreferredSize(new Dimension(larguraMalha + 100, alturaMalha));
+        add(painel, BorderLayout.CENTER);
 
         random = new Random();
         simulacaoRodando = false;
@@ -58,20 +61,21 @@ public class MalhaGUI extends JFrame {
         iniciarSimulacao = new JButton("Iniciar Simulação");
         iniciarSimulacao.addActionListener(e -> iniciarSimulacao());
         controlPanel.add(iniciarSimulacao);
+        iniciarSimulacao.setEnabled(false);
 
         terminarSimulacao = new JButton("Terminar Simulação");
         terminarSimulacao.addActionListener(e -> terminarSimulacao());
         controlPanel.add(terminarSimulacao);
+        terminarSimulacao.setEnabled(false);
 
 
-        simulaSemaforo = new JButton("Semaforo");
-        simulaSemaforo.addActionListener(e -> usaSemaforo());
-        controlPanel.add(simulaSemaforo);
+        simulaSemaphore = new JButton("Semaforo");
+        simulaSemaphore.addActionListener(e -> usaSemaforo());
+        controlPanel.add(simulaSemaphore);
 
         simulaMonitor = new JButton("Monitor");
         simulaMonitor.addActionListener(e -> usaMonitor());
         controlPanel.add(simulaMonitor);
-
 
 
         quantidadeVeiculosField = new JTextField("10", 5); // Valor padrão de 10 veículos
@@ -89,13 +93,16 @@ public class MalhaGUI extends JFrame {
     }
 
     private String usaMonitor() {
-        simulaSemaforo.setEnabled(false);
-
+        simulaSemaphore.setEnabled(false);
+        onMonitor = true;
+        iniciarSimulacao.setEnabled(true);
         return "Strinf";
     }
 
     private String usaSemaforo() {
         simulaMonitor.setEnabled(false);
+        onSemaphore = true;
+        iniciarSimulacao.setEnabled(true);
         return "Strinf";
     }
 
@@ -152,6 +159,10 @@ public class MalhaGUI extends JFrame {
         }
 
         simulacaoRodando = true;
+        terminarSimulacao.setEnabled(true);
+        iniciarSimulacao.setEnabled(false);
+        simulaSemaphore.setEnabled(false);
+        simulaMonitor.setEnabled(false);
 
         // Inicie a simulação em uma nova thread para não bloquear a EDT
         new Thread(() -> {
@@ -178,7 +189,10 @@ public class MalhaGUI extends JFrame {
         }
         simulacaoRodando = false;
         simulaMonitor.setEnabled(true);
-        simulaSemaforo.setEnabled(true);
+        onMonitor = false;
+        simulaSemaphore.setEnabled(true);
+        onSemaphore = false;
+        terminarSimulacao.setEnabled(false);
 
     }
 
@@ -201,7 +215,7 @@ public class MalhaGUI extends JFrame {
             int coluna = posicaoSelecionada.y;
 
             // Cria o veículo na posição selecionada
-            Veiculo veiculo = new Veiculo(malha, linha, coluna, this, random.nextInt(1000), new Color((int) (Math.random() * 0x1000000))); // Velocidade aleatória
+            Veiculo veiculo = new Veiculo(malha, linha, coluna, this, random.nextInt(1000), new Color((int) (Math.random() * 0x10000000)), new SemaphoreCruzamento(), new MonitorCruzamento()); // Velocidade aleatória
             veiculos.add(veiculo);
 
             // Inicia a thread do veículo na EDT
@@ -210,17 +224,22 @@ public class MalhaGUI extends JFrame {
     }
 
     public static void main(String[] args) {
-        Malha malha = new Malha("src/main/java/org/matheus/barros/malha.txt");
+        Malha malha = new Malha("MalhaViaria/src/malhas/malha-exemplo-1.txt");
         MalhaGUI gui = new MalhaGUI(malha);
     }
 
     public boolean posicaoEstaLivre(int linha, int coluna) {
+
+        if (!malha.ehPosicaoValida(linha, coluna)){
+            return false;
+        }
         for(Veiculo veiculo : veiculos){
             if(veiculo.getLinhaAtual() == linha && veiculo.getColunaAtual() == coluna) {
                 return false;
             }
         }
-        return malha.ehPosicaoValida(linha, coluna);
+
+        return true;
     }
 
     public boolean isSimulacaoRodando(){

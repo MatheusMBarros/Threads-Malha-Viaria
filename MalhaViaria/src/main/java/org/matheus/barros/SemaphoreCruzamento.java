@@ -2,10 +2,10 @@ package org.matheus.barros;
 
 import java.util.concurrent.Semaphore;
 
-public class SemaforoCruzamento {
+public class SemaphoreCruzamento {
     private Semaphore semaforo;
 
-    public SemaforoCruzamento() {
+    public SemaphoreCruzamento() {
         semaforo = new Semaphore(1); // Inicializa o semáforo com uma permissão (um veículo pode passar)
     }
 

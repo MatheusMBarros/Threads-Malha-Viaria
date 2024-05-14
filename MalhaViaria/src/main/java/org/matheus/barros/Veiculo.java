@@ -2,11 +2,7 @@ package org.matheus.barros;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.Semaphore;
-
 
 public class Veiculo extends Thread {
     private static final int[][] DIRECOES = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}}; // cima, direita, baixo, esquerda
@@ -17,10 +13,12 @@ public class Veiculo extends Thread {
     private Color cor;
     private Random random;
     private MalhaGUI gui;
-    private static final Semaphore semaforoCruzamento = new Semaphore(1);
     private int velocidade;
 
-    public Veiculo(Malha malha, int linha, int coluna, MalhaGUI gui, int velocidade, Color cor) {
+    private SemaphoreCruzamento semaphore;
+    private MonitorCruzamento monitor;
+
+    public Veiculo(Malha malha, int linha, int coluna, MalhaGUI gui, int velocidade, Color cor, SemaphoreCruzamento semaphore, MonitorCruzamento monitor) {
         this.malha = malha;
         this.linhaAtual = linha;
         this.colunaAtual = coluna;
@@ -29,6 +27,8 @@ public class Veiculo extends Thread {
         this.gui = gui;
         this.velocidade = velocidade;
         this.cor = cor;
+        this.semaphore = semaphore;
+        this.monitor = monitor;
     }
 
     @Override
@@ -36,10 +36,22 @@ public class Veiculo extends Thread {
         while (!isInterrupted() && gui.isSimulacaoRodando()) {
             try {
                 Thread.sleep(velocidade > 0 ? velocidade : 1); // Garante que o tempo de espera seja sempre positivo
-                mover();
+
+                if(gui.onMonitor){
+                    monitor.entrarCruzamento();
+                    mover();
+                    monitor.sairCruzamento();
+                }
+                if(gui.onSemaphore){
+                    semaphore.entrarCruzamento(); // Tenta entrar no cruzamento
+                    mover();
+                    semaphore.sairCruzamento(); // Sai do cruzamento após a movimentação
+                }
+
                 SwingUtilities.invokeLater(gui::repaint);
             } catch (InterruptedException e) {
                 e.notifyAll();
+                interrupt();
             }
         }
     }
@@ -49,7 +61,6 @@ public class Veiculo extends Thread {
     }
 
     public void mover() {
-        System.out.println("movendo" + linhaAtual);
         int proximaLinha = linhaAtual;
         int proximaColuna = colunaAtual;
 
@@ -78,18 +89,67 @@ public class Veiculo extends Thread {
                 linhaAtual = proximaLinha;
                 colunaAtual = proximaColuna;
             }
-        }
 
-        // Atualiza a direção do veículo se necessário
-        if (malha.getTipoSegmento(linhaAtual, colunaAtual) >= 5) {
-            boolean[] saidasDisponiveis = malha.getDirecoesDisponiveis(linhaAtual, colunaAtual);
-            for (int i = 0; i < DIRECOES.length; i++) {
-                if (saidasDisponiveis[i]) {
-                    direcao = i;
-                    break;
+            if (tipoSegmentoProximo >= 9 && tipoSegmentoProximo <= 12) {
+                if (semaphore.availablePermits() == 1) {
+                    // Verifica se há apenas um veículo no cruzamento
+                    boolean[] saidasDisponiveis = malha.getDirecoesDisponiveis(proximaLinha, proximaColuna);
+
+                    // Escolhe a direção correta de acordo com o tipo de cruzamento
+                    switch (tipoSegmentoProximo) {
+                        case 9: // Cruzamento Cima e Direita
+                            if (direcao == 0 && saidasDisponiveis[1]) {
+                                direcao = 1;
+                                colunaAtual++;
+                            } else if (direcao == 1 && saidasDisponiveis[0]) {
+                                direcao = 0;
+                                linhaAtual--;
+                            }
+                            break;
+                        case 10: // Cruzamento Cima e Esquerda
+                            if (direcao == 0 && saidasDisponiveis[3]) {
+                                direcao = 3;
+                                colunaAtual--;
+                            } else if (direcao == 3 && saidasDisponiveis[0]) {
+                                direcao = 0;
+                                linhaAtual--;
+                            }
+                            break;
+                        case 11: // Cruzamento Direita e Baixo
+                            if (direcao == 1 && saidasDisponiveis[2]) {
+                                direcao = 2;
+                                linhaAtual++;
+                            } else if (direcao == 2 && saidasDisponiveis[1]) {
+                                direcao = 1;
+                                colunaAtual++;
+                            }
+                            break;
+                        case 12: // Cruzamento Baixo e Esquerda
+                            if (direcao == 2 && saidasDisponiveis[3]) {
+                                direcao = 3;
+                                colunaAtual--;
+                            } else if (direcao == 3 && saidasDisponiveis[2]) {
+                                direcao = 2;
+                                linhaAtual++;
+                            }
+                            break;
+                    }
                 }
             }
         }
+
+        SwingUtilities.invokeLater(gui::repaint);
+
+        // Atualiza a direção do veículo se necessário
+//        if (malha.getTipoSegmento(linhaAtual, colunaAtual) >= 5) {
+//            boolean[] saidasDisponiveis = malha.getDirecoesDisponiveis(linhaAtual, colunaAtual);
+//            for (int i = 0; i < DIRECOES.length; i++) {
+//                if (saidasDisponiveis[i]) {
+//                    direcao = i;
+//                    break;
+//                }
+//            }
+//        }
     }
 
     private int escolherDirecaoInicial() {

@@ -201,7 +201,7 @@ public class MalhaGUI extends JFrame {
             int coluna = posicaoSelecionada.y;
 
             // Cria o veículo na posição selecionada
-            Veiculo veiculo = new Veiculo(malha, linha, coluna, this, random.nextInt(1000), new Color((int) (Math.random() * 0x1000000)),new SemaforoCruzamento()); // Velocidade aleatória
+            Veiculo veiculo = new Veiculo(malha, linha, coluna, this, random.nextInt(1000), new Color((int) (Math.random() * 0x1000000))); // Velocidade aleatória
             veiculos.add(veiculo);
 
             // Inicia a thread do veículo na EDT

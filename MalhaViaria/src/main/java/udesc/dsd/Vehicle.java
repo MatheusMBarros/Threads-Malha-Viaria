@@ -1,31 +1,31 @@
-package org.matheus.barros;
+package udesc.dsd;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Random;
 
-public class Veiculo extends Thread {
+public class Vehicle extends Thread {
     private static final int[][] DIRECOES = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}}; // cima, direita, baixo, esquerda
-    private Malha malha;
+    private Road road;
     private int linhaAtual;
     private int colunaAtual;
-    private int direcao;
+    private int direction;
     private Color cor;
     private Random random;
-    private MalhaGUI gui;
-    private int velocidade;
+    private Main gui;
+    private int sleep;
 
-    private SemaphoreCruzamento semaphore;
-    private MonitorCruzamento monitor;
+    private SemaphoreCell semaphore;
+    private MonitorCell monitor;
 
-    public Veiculo(Malha malha, int linha, int coluna, MalhaGUI gui, int velocidade, Color cor, SemaphoreCruzamento semaphore, MonitorCruzamento monitor) {
-        this.malha = malha;
-        this.linhaAtual = linha;
+    public Vehicle(Road road, int linha, int coluna, Main gui, int velocidade, Color cor, SemaphoreCell semaphore, MonitorCell monitor) {
+        this.road = road;
+        this.cell = linha;
         this.colunaAtual = coluna;
-        this.direcao = escolherDirecaoInicial();
+        this.direction = chooseDirection();
         this.random = new Random();
         this.gui = gui;
-        this.velocidade = velocidade;
+        this.sleep = velocidade;
         this.cor = cor;
         this.semaphore = semaphore;
         this.monitor = monitor;
@@ -65,7 +65,7 @@ public class Veiculo extends Thread {
         int proximaColuna = colunaAtual;
 
         // Determina a próxima posição com base na direção atual do veículo
-        switch (direcao) {
+        switch (direction) {
             case 0: // Cima
                 proximaLinha--;
                 break;
@@ -83,7 +83,7 @@ public class Veiculo extends Thread {
         // Verifica se a próxima posição é válida
         if (gui.posicaoEstaLivre(proximaLinha, proximaColuna)) {
             // Verifica se a próxima posição é uma via
-            int tipoSegmentoProximo = malha.getTipoSegmento(proximaLinha, proximaColuna);
+            int tipoSegmentoProximo = road.getTipoSegmento(proximaLinha, proximaColuna);
             if (tipoSegmentoProximo >= 1 && tipoSegmentoProximo <= 4) {
                 // Move o veículo para a próxima posição
                 linhaAtual = proximaLinha;
@@ -93,43 +93,43 @@ public class Veiculo extends Thread {
             if (tipoSegmentoProximo >= 9 && tipoSegmentoProximo <= 12) {
                 if (semaphore.availablePermits() == 1) {
                     // Verifica se há apenas um veículo no cruzamento
-                    boolean[] saidasDisponiveis = malha.getDirecoesDisponiveis(proximaLinha, proximaColuna);
+                    boolean[] saidasDisponiveis = road.getDirecoesDisponiveis(proximaLinha, proximaColuna);
 
                     // Escolhe a direção correta de acordo com o tipo de cruzamento
                     switch (tipoSegmentoProximo) {
                         case 9: // Cruzamento Cima e Direita
-                            if (direcao == 0 && saidasDisponiveis[1]) {
-                                direcao = 1;
+                            if (direction == 0 && saidasDisponiveis[1]) {
+                                direction = 1;
                                 colunaAtual++;
-                            } else if (direcao == 1 && saidasDisponiveis[0]) {
-                                direcao = 0;
+                            } else if (direction == 1 && saidasDisponiveis[0]) {
+                                direction = 0;
                                 linhaAtual--;
                             }
                             break;
                         case 10: // Cruzamento Cima e Esquerda
-                            if (direcao == 0 && saidasDisponiveis[3]) {
-                                direcao = 3;
+                            if (direction == 0 && saidasDisponiveis[3]) {
+                                direction = 3;
                                 colunaAtual--;
-                            } else if (direcao == 3 && saidasDisponiveis[0]) {
-                                direcao = 0;
+                            } else if (direction == 3 && saidasDisponiveis[0]) {
+                                direction = 0;
                                 linhaAtual--;
                             }
                             break;
                         case 11: // Cruzamento Direita e Baixo
-                            if (direcao == 1 && saidasDisponiveis[2]) {
-                                direcao = 2;
+                            if (direction == 1 && saidasDisponiveis[2]) {
+                                direction = 2;
                                 linhaAtual++;
-                            } else if (direcao == 2 && saidasDisponiveis[1]) {
-                                direcao = 1;
+                            } else if (direction == 2 && saidasDisponiveis[1]) {
+                                direction = 1;
                                 colunaAtual++;
                             }
                             break;
                         case 12: // Cruzamento Baixo e Esquerda
-                            if (direcao == 2 && saidasDisponiveis[3]) {
-                                direcao = 3;
+                            if (direction == 2 && saidasDisponiveis[3]) {
+                                direction = 3;
                                 colunaAtual--;
-                            } else if (direcao == 3 && saidasDisponiveis[2]) {
-                                direcao = 2;
+                            } else if (direction == 3 && saidasDisponiveis[2]) {
+                                direction = 2;
                                 linhaAtual++;
                             }
                             break;
@@ -141,26 +141,26 @@ public class Veiculo extends Thread {
         SwingUtilities.invokeLater(gui::repaint);
 
         // Atualiza a direção do veículo se necessário
-//        if (malha.getTipoSegmento(linhaAtual, colunaAtual) >= 5) {
-//            boolean[] saidasDisponiveis = malha.getDirecoesDisponiveis(linhaAtual, colunaAtual);
+//        if (road.getTipoSegmento(linhaAtual, colunaAtual) >= 5) {
+//            boolean[] saidasDisponiveis = road.getDirecoesDisponiveis(linhaAtual, colunaAtual);
 //            for (int i = 0; i < DIRECOES.length; i++) {
 //                if (saidasDisponiveis[i]) {
-//                    direcao = i;
+//                    direction = i;
 //                    break;
 //                }
 //            }
 //        }
     }
 
-    private int escolherDirecaoInicial() {
+    private int chooseDirection() {
         // Determina a direção inicial com base nas saídas disponíveis na posição atual
-        boolean[] saidasDisponiveis = malha.getDirecoesDisponiveis(linhaAtual, colunaAtual);
+        boolean[] saidasDisponiveis = road.getDirecoesDisponiveis(linhaAtual, colunaAtual);
         for (int i = 0; i < DIRECOES.length; i++) {
             if (saidasDisponiveis[i]) {
                 return i;
             }
         }
-        return -1; // Não deveria acontecer se a malha estiver bem definida
+        return -1; // Não deveria acontecer se a road estiver bem definida
     }
 
     public int getColunaAtual() {

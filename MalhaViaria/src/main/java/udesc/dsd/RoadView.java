@@ -1,4 +1,4 @@
-package org.matheus.barros;
+package udesc.dsd;
 
 import javax.swing.*;
 import java.awt.*;
@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 
-public class MalhaGUI extends JFrame {
-    private Malha malha;
+public class RoadView extends JFrame {
+    private Road road;
     private int larguraCelula = 40;
     private int alturaCelula = 40;
     private int larguraMalha;
@@ -17,22 +17,20 @@ public class MalhaGUI extends JFrame {
     private int maxVeiculos;
     private boolean simulacaoRodando;
 
-    private ArrayList<Veiculo> veiculos;
+    private ArrayList<Vehicle> vehicles;
 
     private JButton iniciarSimulacao;
     private JButton terminarSimulacao;
     private JButton simulaSemaphore;
     private JButton simulaMonitor;
 
-    protected boolean onSemaphore;
-    protected boolean onMonitor;
 
     private JTextField quantidadeVeiculosField;
 
-    public MalhaGUI(Malha malha) {
-        this.malha = malha;
-        larguraMalha = malha.getColunas() * larguraCelula;
-        alturaMalha = malha.getLinhas() * alturaCelula;
+    public RoadView(Road road) {
+        this.road = road;
+        larguraMalha = road.getColunas() * larguraCelula;
+        alturaMalha = road.getLinhas() * alturaCelula;
 
         setTitle("Simulador de Tráfego");
         setSize(larguraMalha + 100, alturaMalha + 100); // Adicionando espaço para os botões
@@ -42,9 +40,9 @@ public class MalhaGUI extends JFrame {
         painel = new JPanel(new FlowLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            desenharMalha(g);
-            desenharVeiculos(g);
+                super.paintComponent(g);
+                desenharMalha(g);
+                desenharVeiculos(g);
             }
         };
 
@@ -53,7 +51,7 @@ public class MalhaGUI extends JFrame {
 
         random = new Random();
         simulacaoRodando = false;
-        veiculos = new ArrayList<Veiculo>();
+        vehicles = new ArrayList<Vehicle>();
 
         // Adicionando botões e inputs
         JPanel controlPanel = new JPanel(new FlowLayout());
@@ -107,20 +105,20 @@ public class MalhaGUI extends JFrame {
     }
 
     private void desenharVeiculos(Graphics g) {
-        for (Veiculo veiculo : veiculos) {
-            int linha = veiculo.getLinhaAtual();
-            int coluna = veiculo.getColunaAtual();
+        for (Vehicle vehicle : vehicles) {
+            int linha = vehicle.getLinhaAtual();
+            int coluna = vehicle.getColunaAtual();
             int x = coluna * larguraCelula;
             int y = linha * alturaCelula;
-            g.setColor(veiculo.getCor());
+            g.setColor(vehicle.getCor());
             g.fillOval(x, y, larguraCelula, alturaCelula);
         }
     }
 
     private void desenharMalha(Graphics g) {
-        for (int i = 0; i < malha.getLinhas(); i++) {
-            for (int j = 0; j < malha.getColunas(); j++) {
-                int tipo = malha.getTipoSegmento(i, j);
+        for (int i = 0; i < road.getLinhas(); i++) {
+            for (int j = 0; j < road.getColunas(); j++) {
+                int tipo = road.getTipoSegmento(i, j);
                 Color cor;
                 switch (tipo) {
                     case 0:
@@ -167,7 +165,7 @@ public class MalhaGUI extends JFrame {
         // Inicie a simulação em uma nova thread para não bloquear a EDT
         new Thread(() -> {
             while (simulacaoRodando) {
-                if (veiculos.size() < maxVeiculos) {
+                if (vehicles.size() < maxVeiculos) {
                     inserirVeiculo();
                     SwingUtilities.invokeLater(this::repaint); // Redesenha a interface gráfica após adicionar um novo veículo
                 }
@@ -181,10 +179,10 @@ public class MalhaGUI extends JFrame {
     }
 
     public void terminarSimulacao(){
-        Iterator<Veiculo> iterator = veiculos.iterator();
+        Iterator<Vehicle> iterator = vehicles.iterator();
         while (iterator.hasNext()) {
-            Veiculo veiculo = iterator.next();
-            veiculo.interrupt();
+            Vehicle vehicle = iterator.next();
+            vehicle.interrupt();
             iterator.remove();
         }
         simulacaoRodando = false;
@@ -198,11 +196,11 @@ public class MalhaGUI extends JFrame {
 
     private void inserirVeiculo() {
         ArrayList<Point> posicoesValidas = new ArrayList<>();
-        // Itera sobre todas as posições da malha
-        for (int i = 0; i < malha.getLinhas(); i++) {
-            for (int j = 0; j < malha.getColunas(); j++) {
+        // Itera sobre todas as posições da road
+        for (int i = 0; i < road.getLinhas(); i++) {
+            for (int j = 0; j < road.getColunas(); j++) {
                 // Verifica se a posição está livre e não é uma área proibida (tipo 0)
-                if (posicaoEstaLivre(i, j) && malha.ehPontoDeEntrada(i, j)) {
+                if (posicaoEstaLivre(i, j) && road.ehPontoDeEntrada(i, j)) {
                     posicoesValidas.add(new Point(i, j)); // Adiciona a posição válida à lista
                 }
             }
@@ -215,26 +213,26 @@ public class MalhaGUI extends JFrame {
             int coluna = posicaoSelecionada.y;
 
             // Cria o veículo na posição selecionada
-            Veiculo veiculo = new Veiculo(malha, linha, coluna, this, random.nextInt(1000), new Color((int) (Math.random() * 0x10000000)), new SemaphoreCruzamento(), new MonitorCruzamento()); // Velocidade aleatória
-            veiculos.add(veiculo);
+            Vehicle vehicle = new Vehicle(road, linha, coluna, this, random.nextInt(200, 1000), new Color((int) (Math.random() * 0x10000000)), new SemaphoreCell(), new MonitorCell()); // Velocidade aleatória
+            vehicles.add(vehicle);
 
             // Inicia a thread do veículo na EDT
-            SwingUtilities.invokeLater(veiculo::start);
+            SwingUtilities.invokeLater(vehicle::start);
         }
     }
 
     public static void main(String[] args) {
-        Malha malha = new Malha("MalhaViaria/src/malhas/malha-exemplo-1.txt");
-        MalhaGUI gui = new MalhaGUI(malha);
+        Road road = new Road("MalhaViaria/src/malhas/road-exemplo-1.txt");
+        Main gui = new Main(road);
     }
 
     public boolean posicaoEstaLivre(int linha, int coluna) {
 
-        if (!malha.ehPosicaoValida(linha, coluna)){
+        if (!road.ehPosicaoValida(linha, coluna)){
             return false;
         }
-        for(Veiculo veiculo : veiculos){
-            if(veiculo.getLinhaAtual() == linha && veiculo.getColunaAtual() == coluna) {
+        for(Vehicle vehicle : vehicles){
+            if(vehicle.getLinhaAtual() == linha && vehicle.getColunaAtual() == coluna) {
                 return false;
             }
         }

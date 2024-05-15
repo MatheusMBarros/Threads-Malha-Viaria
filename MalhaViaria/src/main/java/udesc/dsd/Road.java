@@ -1,20 +1,66 @@
-package org.matheus.barros;
+package udesc.dsd;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
 
-public class Malha {
-    private int[][] segmentos;
-    private int linhas;
-    private int colunas;
+public class Road {
+    private Cell[][] grid;
+    private final List<Vehicle> cars = new ArrayList<>();
 
-    public Malha(String arquivo) {
-        carregarMalha(arquivo);
-    }
-
-    private void carregarMalha(String arquivo) {
+    public Road(String file) {
         try (BufferedReader br = new BufferedReader(new FileReader(arquivo))) {
+
+            try{
+                int cols;
+                int lines = 0;
+                int columnCounter = 0;
+                int lineCounter = 0;
+                String[] values;
+                String line = reader.readLine();
+
+                while(line != null){
+                    values = line.split("\t");
+
+                    if(lineCounter < 2){
+                        if (lineCounter == 0) lines = Integer.parseInt(values[0]);
+                        else{
+                            cols = Integer.parseInt(values[0]);
+                            matrix = new Cell[lines][cols];
+                        }
+
+                        lineCounter++;
+                        line = reader.readLine();
+                        continue;
+                    }
+
+                    assert matrix != null;
+
+                    for(String value : values){
+                        int numValue = Integer.parseInt(value);
+                        int cellLine = lineCounter - 2;
+                        Direction direction = new Direction(numValue);
+                        boolean isEntrance = isEntrance(direction.to(), cellLine, columnCounter);
+                        boolean isCross = isCross(direction.to());
+
+                        Cell cell = factory.createCell(cellLine, columnCounter, direction, isEntrance, isCross);
+
+                        matrix[cell.getRow()][cell.getCol()] = cell;
+                        columnCounter++;
+                    }
+
+                    lineCounter++;
+                    columnCounter = 0;
+                    line = reader.readLine();
+                }
+
+            } catch (IOException e){
+                return new Cell[0][0];
+            }
+
+            return matrix;
+
             linhas = Integer.parseInt(br.readLine());
             colunas = Integer.parseInt(br.readLine());
             segmentos = new int[linhas][colunas];
@@ -27,6 +73,12 @@ public class Malha {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        for (Cell[] cells : matrix) {
+            for(Cell cell : cells){
+                if (cell.isEntrance()) entrances.add(cell);
+            }
         }
     }
 
@@ -42,25 +94,11 @@ public class Malha {
         return segmentos[i][j];
     }
 
-    public boolean ehPontoDeEntrada(int linha, int coluna) {
-        // Verifica se a posição está em uma borda da malha e se não é uma área proibida (tipo 0)
+    public boolean isEntrancePoint(int linha, int coluna) {
         return ((linha == 0 && this.getTipoSegmento(linha, coluna) == 3) ||
                 (linha == getLinhas() - 1 && this.getTipoSegmento(linha, coluna) == 1) ||
                 (coluna == 0 && this.getTipoSegmento(linha, coluna) == 2) ||
                 (coluna == getColunas() - 1 && this.getTipoSegmento(linha, coluna) == 4)) ;
-    }
-
-
-    public boolean ehPontoDeSaida(int linha, int coluna) {
-        // Verifica se a posição está em uma borda da malha
-        return ((linha == 0 && this.getTipoSegmento(linha, coluna) == 1) ||
-                (linha == getLinhas() - 1 && this.getTipoSegmento(linha, coluna) == 3) ||
-                (coluna == 0 && this.getTipoSegmento(linha, coluna) == 4) ||
-                (coluna == getColunas() - 1 && this.getTipoSegmento(linha, coluna) == 2)) ;
-    }
-
-    public boolean ehPosicaoValida(int linha, int coluna) {
-        return (linha >= 0 && linha < linhas && coluna >= 0 && coluna < colunas) && segmentos[linha][coluna] != 0;
     }
 
     public boolean[] getDirecoesDisponiveis(int linha, int coluna) {

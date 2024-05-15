@@ -1,11 +1,11 @@
-package org.matheus.barros;
+package udesc.dsd;
 
 import java.util.concurrent.Semaphore;
 
-public class SemaphoreCruzamento {
+public class SemaphoreCell extends Cell {
     private Semaphore semaforo;
 
-    public SemaphoreCruzamento() {
+    public SemaphoreCell() {
         semaforo = new Semaphore(1); // Inicializa o semáforo com uma permissão (um veículo pode passar)
     }
 

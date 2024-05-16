@@ -1,18 +1,19 @@
 package udesc.dsd;
 
 import javax.swing.*;
+import java.io.IOException;
 
 public class MainView extends JFrame {
 
     private JButton btStart;
     private JTextField tfVehicleCount;
+    private JRadioButton rbRoadModel1;
+    private JRadioButton rbRoadModel2;
+    private JRadioButton rbRoadModel3;
+    private JRadioButton rbMutualExclusion1;
+    private JRadioButton rbMutualExclusion2;
     private ButtonGroup rbRoadModel;
-    private ButtonGroup rbMutualExclusionGroup;
-    private JRadioButton rbModel1;
-    private JRadioButton rbModel2;
-    private JRadioButton rbModel3;
-    private JRadioButton rbSemaphores;
-    private JRadioButton rbMonitors;
+    private ButtonGroup rbMutualExclusion;
     private JLabel lbVehicleCount;
     private JLabel lbRoadModel;
     private JLabel lbMutualExclusion;
@@ -20,32 +21,42 @@ public class MainView extends JFrame {
 
     public MainView(){
         setLocationRelativeTo(null);
-        setSize(420, 440);
-        setVisible(true);
+        setResizable(false);
+        setSize(350, 450);
         setTitle("Simulação de trafego");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         initComponents();
+        setVisible(true);
     }
 
     private void initComponents() {
         setLayout(null);
 
         // Labels
-        lbRoadModel = new JLabel("Malha a ser utilizada");
-        lbVehicleCount = new JLabel("Número de Veículos");
-        lbMutualExclusion = new JLabel("Algoritmo de exclusão mútua ");
+        lbRoadModel = new JLabel("Malha a ser utilizada:");
+        lbVehicleCount = new JLabel("Número de Veículos:");
+        lbMutualExclusion = new JLabel("Algoritmo de exclusão mútua:");
 
         // Text Field
         tfVehicleCount = new JTextField("10");
 
         // Radio Buttons for Model
-        rbRoadModel = new JRadioButton("1");
-        rbRoadModel = new JRadioButton("2");
-        rbRoadModel = new JRadioButton("3");
+        rbRoadModel1 = new JRadioButton("1");
+        rbRoadModel2 = new JRadioButton("2");
+        rbRoadModel3 = new JRadioButton("3");
+
+        rbRoadModel = new ButtonGroup();
+        rbRoadModel.add(rbRoadModel1);
+        rbRoadModel.add(rbRoadModel2);
+        rbRoadModel.add(rbRoadModel3);
 
         // Radio Buttons for Mutual Exclusion
-        rbSemaphores = new JRadioButton("Semaphore");
-        rbMonitors = new JRadioButton("Monitor");
+        rbMutualExclusion1 = new JRadioButton("Semaphore");
+        rbMutualExclusion2 = new JRadioButton("Monitor");
+
+        rbMutualExclusion = new ButtonGroup();
+        rbMutualExclusion.add(rbMutualExclusion1);
+        rbMutualExclusion.add(rbMutualExclusion2);
 
         // Button
         btStart = new JButton("Iniciar");
@@ -53,83 +64,79 @@ public class MainView extends JFrame {
 
         // Adicionando componentes ao container
         add(lbRoadModel);
-        add(lbVehicleCount);
-        add(lbMutualExclusion);
-        add(new JLabel()); // Espaço vazio
+        add(rbRoadModel1);
+        add(rbRoadModel2);
+        add(rbRoadModel3);
 
+        add(lbVehicleCount);
         add(tfVehicleCount);
 
-        add(rbModel1);
-        add(rbModel2);
-        add(rbModel3);
-
-        add(rbSemaphores);
-        add(rbMonitors);
+        add(lbMutualExclusion);
+        add(rbMutualExclusion1);
+        add(rbMutualExclusion2);
 
         add(btStart);
 
         // Posicionando os componentes
         lbRoadModel.setBounds(20, 20, 200, 25);
-        lbVehicleCount.setBounds(20, 50, 200, 25);
-        lbMutualExclusion.setBounds(20, 80, 200, 25);
+        rbRoadModel1.setBounds(20, 50, 150, 25);
+        rbRoadModel2.setBounds(20, 80, 150, 25);
+        rbRoadModel3.setBounds(20, 110, 150, 25);
 
-        tfVehicleCount.setBounds(220, 50, 150, 25);
+        lbVehicleCount.setBounds(20, 160, 200, 25);
+        tfVehicleCount.setBounds(220, 160, 100, 25);
 
-        rbModel1.setBounds(20, 110, 150, 25);
-        rbModel2.setBounds(20, 140, 150, 25);
-        rbModel3.setBounds(20, 170, 150, 25);
+        lbMutualExclusion.setBounds(20, 210, 200, 25);
+        rbMutualExclusion1.setBounds(20, 240, 150, 25);
+        rbMutualExclusion2.setBounds(20, 270, 150, 25);
 
-        rbSemaphores.setBounds(20, 200, 150, 25);
-        rbMonitors.setBounds(20, 230, 150, 25);
-
-        btStart.setBounds(20, 260, 150, 25);
+        btStart.setBounds(20, 340, 150, 25);
     }
 
     private void init(){
-        String file = null;
 
-        if (rbModel1.isSelected())
-            file = "malha-exemplo-1.txt";
-        else if(rbModel2.isSelected())
-            file = "malha-exemplo-2.txt";
-        else if (rbModel3.isSelected())
-            file = "malha-exemplo-3.txt";
+        String file = getRoadModel();
+        CellFactory cellFactory = getMutualExclusion();
+        int vehicleCount = Integer.parseInt(tfVehicleCount.getText());
 
-        if (file != null && cellFactory != null) {
-            Road road = new Road(file, cellFactory);
-            CarFactory carFactory = new CarFactory(road);
-            EntranceMediatorRoutine routine = new EntranceMediatorRoutine(road);
+        try {
+            if (file != null && cellFactory != null && vehicleCount > 0) {
 
-            int carCount = Integer.parseInt(tfCarCount.getText());
+                road = new Road(file, cellFactory, vehicleCount);
+                VehicleFactory vehicleFactory = new VehicleFactory(road);
 
-            for (int i = 0; i < carCount; i++) {
-                Car car = carFactory.buildCar();
-                routine.addToQueue(car);
+                for (int i = 0; i < vehicleCount; i++) {
+                    Vehicle vehicle = vehicleFactory.createVehicle();
+                    road.addToEntranceQueue(vehicle);
+                }
+
+                new RoadView(road);
+
+                road.start();
+                dispose();
             }
-
-            new RoadView(road);
-
-            routine.start();
-        } else {
-            // Lida com o caso em que nenhum modelo de malha ou método de exclusão mútua foi selecionado
         }
-
-        String method= rbSemaphores.isSelected()? new SemaphoricCellFactory() : rbMonitors.isSelected()? new MonitorsCellFactory() : null;
-        road = new Road(file, cellFactory);
-
-        CarFactory carFactory = new CarFactory(road);
-
-        EntranceMediatorRoutine routine = new EntranceMediatorRoutine(road);
-
-        int carCount = Integer.parseInt(tfCarCount.getText());
-
-        for(int i = 0; i < carCount; i++){
-            Car car = carFactory.buildCar();
-            routine.addToQueue(car);
+        catch (Exception e){
+            e.printStackTrace();
         }
-        new RoadView(road);
+    }
 
-        routine.start();
+    private String getRoadModel(){
+        if (rbRoadModel1.isSelected())
+            return "malha-exemplo-1.txt";
+        else if(rbRoadModel2.isSelected())
+            return "malha-exemplo-2.txt";
+        else if (rbRoadModel3.isSelected())
+            return "malha-exemplo-3.txt";
+        return null;
+    }
+
+    private CellFactory getMutualExclusion(){
+        if (rbMutualExclusion1.isSelected())
+            return new SemaphoreCellFactory();
+        else if(rbMutualExclusion2.isSelected())
+            return new MonitorCellFactory();
+        return null;
     }
 
 }

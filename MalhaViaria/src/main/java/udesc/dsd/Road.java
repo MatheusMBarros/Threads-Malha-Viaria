@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 public class Road {
 
@@ -68,8 +69,12 @@ public class Road {
         new Thread(() -> {
             while (vehicleEntrance) {
                 if (vehicles.size() < maxVehicles) {
-                    addVehicle(entranceQueue.get(0));
-                    System.out.println(vehicles);
+                    try {
+                        addVehicle(entranceQueue.get(0));
+                        entranceQueue.remove(0);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
                 try {
                     Thread.sleep(1000);
@@ -81,12 +86,19 @@ public class Road {
     }
 
     public synchronized Cell getEmptyEntrance(){
-        for (Cell entrance : entrances)
-            if (entrance.isEmpty()) return entrance;
-        return null;
+        Random random = new Random();
+        Cell entrance;
+
+        while (true) {
+            entrance = entrances.get(random.nextInt(entrances.size()));
+            if (entrance.isEmpty()) {
+                return entrance;
+            }
+        }
     }
 
-    public void addVehicle(Vehicle v) {
+    public void addVehicle(Vehicle v) throws InterruptedException {
+        v.setCell(getEmptyEntrance());
         vehicles.add(v);
     }
 
@@ -116,7 +128,51 @@ public class Road {
 
     }
 
+    public List<Vehicle> getVehicles(){
+        return this.vehicles;
+    }
+
     public Cell[][] getGrid(){
         return grid;
+    }
+
+    public Cell cellAtUp(Position pos){
+        try{
+            return grid[pos.y + 1][pos.y];
+        } catch (ArrayIndexOutOfBoundsException ex){
+            return null;
+        }
+    }
+
+    public Cell cellAtDown(Position pos) {
+        try {
+            return grid[pos.y - 1][pos.x];
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            return null;
+        }
+    }
+
+    public Cell cellAtRight(Position pos) {
+        try {
+            return grid[pos.y][pos.x + 1];
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            return null;
+        }
+    }
+
+    public Cell cellAtLeft(Position pos) {
+        try {
+            return grid[pos.y][pos.x - 1];
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            return null;
+        }
+    }
+
+    public boolean isActive(){
+        return vehicleEntrance;
+    }
+
+    public void end(){
+        vehicleEntrance = false;
     }
 }

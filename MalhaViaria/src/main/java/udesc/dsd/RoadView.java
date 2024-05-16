@@ -15,6 +15,7 @@ public class RoadView extends JFrame {
     private int width;
     private int height;
 
+    private JButton btEnd;
 
     public RoadView(Road road) {
 
@@ -36,8 +37,9 @@ public class RoadView extends JFrame {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 drawRoad(g);
-//                desenharVeiculos(g);
+                drawVehicles(g);
             }
+
         };
 
 
@@ -49,21 +51,14 @@ public class RoadView extends JFrame {
         panel.setPreferredSize(new Dimension(width, height));
         add(panel);
 
+        btEnd = new JButton("Terminar Simulação");
+        btEnd.addActionListener(a -> end());
+        add(btEnd, BorderLayout.SOUTH);
+
         // Adicionando um Timer para atualizar a interface gráfica periodicamente
         Timer timer = new Timer(1000, e -> repaint());
         timer.start();
     }
-
-//    private void desenharVeiculos(Graphics g) {
-//        for (Vehicle vehicle : road.getVehicles()) {
-//            int linha = vehicle.get();
-//            int coluna = vehicle.getColunaAtual();
-//            int x = coluna * cellWidth;
-//            int y = linha * cellHeight;
-//            g.setColor(vehicle.getColor());
-//            g.fillOval(x, y, cellWidth, cellHeight);
-//        }
-//    }
 
     private void drawRoad(Graphics g) {
 
@@ -83,4 +78,29 @@ public class RoadView extends JFrame {
         }
     }
 
+    private void drawVehicles(Graphics g) {
+        for (Vehicle vehicle : road.getVehicles()) {
+            int row = vehicle.getCell().getPosition().y;
+            int col = vehicle.getCell().getPosition().x;
+            int x = col * cellWidth;
+            int y = row * cellHeight;
+            g.setColor(vehicle.getColor());
+            g.fillOval(x, y, cellWidth, cellHeight);
+        }
+    }
+
+    private void end(){
+        road.end();
+        dispose();
+        new MainView();
+    }
+
+//    @Override
+//    public void repaint() {
+//        super.repaint();
+//        Graphics g = getGraphics();
+//        if (g != null) {
+//            drawVehicles(g);
+//        }
+//    }
 }

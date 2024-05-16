@@ -17,14 +17,6 @@ public abstract class Cell {
         this.isExit = isExit;
     }
 
-    public void setVehicle(Vehicle vehicle){
-        this.vehicle = vehicle;
-    }
-
-    public void removeVehicle(){
-        this.vehicle = null;
-    }
-
     public synchronized boolean isEmpty(){
         return vehicle == null;
     }
@@ -32,4 +24,48 @@ public abstract class Cell {
     public CellType getType(){
         return type;
     }
+    public Position getPosition(){
+        return position;
+    }
+
+    public boolean isEntrance() {
+        return isEntrance;
+    }
+
+    public boolean isCross() {
+        return isCross;
+    }
+
+    public boolean isExit() {
+        return isExit;
+    }
+
+    public boolean isCrossEnd(){
+        return type.getCode() > 4 && type.getCode() < 9;
+    }
+
+    public void setVehicle(Vehicle v){
+        this.vehicle = v;
+    }
+
+    public void setVehicleAndLock(Vehicle v) throws InterruptedException {
+        lock();
+        setVehicle(v);
+    }
+
+    public void removeVehicle(){
+        this.vehicle = null;
+    }
+
+    public void removeVehicleAndRelease() {
+        removeVehicle();
+        release();
+    }
+
+    public abstract void release();
+
+    public abstract void lock() throws InterruptedException;
+
+    public abstract boolean tryLock() throws InterruptedException;
+
 }

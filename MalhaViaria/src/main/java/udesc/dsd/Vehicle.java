@@ -19,7 +19,7 @@ public class Vehicle extends Thread {
 
     @Override
     public void run() {
-        while (road.isActive()) {
+        while (road.isActive() && !this.isInterrupted()) {
             try {
                 if(cell == null){
                     moveToCell(road.getEmptyEntrance());
@@ -28,7 +28,7 @@ public class Vehicle extends Thread {
                 Cell nextCell = getNextCell();
                 if(nextCell != null){
                     if(nextCell.isCross()){
-                        CrossStrategy strategy = new CrossStrategy(road, nextCell);
+                        CrossStrategy strategy = new CrossStrategy(road, cell);
                         strategy.cross();
                     }
                     else{

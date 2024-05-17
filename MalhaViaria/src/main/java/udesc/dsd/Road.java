@@ -13,8 +13,6 @@ public class Road {
     private Cell[][] grid;
     private int maxVehicles;
     private final List<Vehicle> vehicles = new ArrayList<>();
-    private final List<Vehicle> entranceQueue = Collections.synchronizedList(new ArrayList<>());
-
     private boolean vehicleEntrance;
     private final List<Cell> entrances = new ArrayList<>();
 
@@ -59,11 +57,9 @@ public class Road {
         runVehicleEntrance();
     }
 
-    public void addToEntranceQueue(Vehicle vehicle){
-        entranceQueue.add(vehicle);
-    }
-
     public void runVehicleEntrance(){
+
+        VehicleFactory vehicleFactory = new VehicleFactory(this);
 
         vehicleEntrance = true;
         new Thread(() -> {
@@ -71,12 +67,11 @@ public class Road {
                 if (vehicles.size() < maxVehicles) {
                     try {
 
-                        Vehicle v = entranceQueue.get(0);
+                        Vehicle v = vehicleFactory.createVehicle();
                         addVehicle(v);
-                        entranceQueue.remove(0);
 
                     } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+                        e.printStackTrace();
                     }
                 }
                 try {
@@ -101,8 +96,8 @@ public class Road {
     }
 
     public void addVehicle(Vehicle v) throws InterruptedException {
-        vehicles.add(v);
         v.start();
+        vehicles.add(v);
     }
 
     public void removeVehicle(Vehicle v){

@@ -103,12 +103,6 @@ public class MainView extends JFrame {
             if (file != null && cellFactory != null && vehicleCount > 0) {
 
                 road = new Road(file, cellFactory, vehicleCount);
-                VehicleFactory vehicleFactory = new VehicleFactory(road);
-
-                for (int i = 0; i < vehicleCount; i++) {
-                    Vehicle vehicle = vehicleFactory.createVehicle();
-                    road.addToEntranceQueue(vehicle);
-                }
 
                 new RoadView(road);
 

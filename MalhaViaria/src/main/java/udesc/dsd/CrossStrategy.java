@@ -143,11 +143,11 @@ public class CrossStrategy {
                     if (this.cell instanceof SemaphoreCell) {
                         this.cell.release();
                         cell.vehicle.moveToCellInCross(a);
-                        cell.vehicle.moveToCellInCross(b);
+                        a.vehicle.moveToCellInCross(b);
                     }
                     else {
                         cell.vehicle.moveToCell(a);
-                        cell.vehicle.moveToCell(b);
+                        a.vehicle.moveToCell(b);
                     }
                     gone = true;
                     a.release();
@@ -179,12 +179,12 @@ public class CrossStrategy {
                     if (this.cell instanceof SemaphoreCell){
                         this.cell.release();
                         cell.vehicle.moveToCellInCross(a);
-                        cell.vehicle.moveToCellInCross(b);
-                        cell.vehicle.moveToCellInCross(c);
+                        a.vehicle.moveToCellInCross(b);
+                        b.vehicle.moveToCellInCross(c);
                     }else {
                         cell.vehicle.moveToCell(a);
-                        cell.vehicle.moveToCell(b);
-                        cell.vehicle.moveToCell(c);
+                        a.vehicle.moveToCell(b);
+                        b.vehicle.moveToCell(c);
                     }
                     gone = true;
                     a.release();
@@ -219,15 +219,15 @@ public class CrossStrategy {
                     if (this.cell instanceof SemaphoreCell){
                         this.cell.release();
                         cell.vehicle.moveToCellInCross(a);
-                        cell.vehicle.moveToCellInCross(b);
-                        cell.vehicle.moveToCellInCross(c);
-                        cell.vehicle.moveToCellInCross(d);
+                        a.vehicle.moveToCellInCross(b);
+                        b.vehicle.moveToCellInCross(c);
+                        c.vehicle.moveToCellInCross(d);
 
                     }else {
                         cell.vehicle.moveToCell(a);
-                        cell.vehicle.moveToCell(b);
-                        cell.vehicle.moveToCell(c);
-                        cell.vehicle.moveToCell(d);
+                        a.vehicle.moveToCell(b);
+                        b.vehicle.moveToCell(c);
+                        c.vehicle.moveToCell(d);
                     }
                     gone = true;
                     a.release();

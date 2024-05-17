@@ -79,12 +79,14 @@ public class RoadView extends JFrame {
 
     private void drawVehicles(Graphics g) {
         for (Vehicle vehicle : road.getVehicles()) {
-            int row = vehicle.getCell().getPosition().y;
-            int col = vehicle.getCell().getPosition().x;
-            int x = col * cellWidth;
-            int y = row * cellHeight;
-            g.setColor(vehicle.getColor());
-            g.fillOval(x, y, cellWidth, cellHeight);
+            if(vehicle.getCell() != null) {
+                int row = vehicle.getCell().getPosition().y;
+                int col = vehicle.getCell().getPosition().x;
+                int x = col * cellWidth;
+                int y = row * cellHeight;
+                g.setColor(vehicle.getColor());
+                g.fillOval(x, y, cellWidth, cellHeight);
+            }
         }
     }
 

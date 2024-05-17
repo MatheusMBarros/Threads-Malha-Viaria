@@ -12,7 +12,7 @@ public class VehicleFactory {
 
     public Vehicle createVehicle(){
         Random rand = new Random();
-        long speed = rand.nextLong(200, 1000);
+        int speed = rand.nextInt(200, 1000);
         return new Vehicle(road, speed, SysColor.getVehicleColor());
     }
 }

@@ -70,8 +70,11 @@ public class Road {
             while (vehicleEntrance) {
                 if (vehicles.size() < maxVehicles) {
                     try {
-                        addVehicle(entranceQueue.get(0));
+
+                        Vehicle v = entranceQueue.get(0);
+                        addVehicle(v);
                         entranceQueue.remove(0);
+
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
@@ -98,8 +101,12 @@ public class Road {
     }
 
     public void addVehicle(Vehicle v) throws InterruptedException {
-        v.setCell(getEmptyEntrance());
         vehicles.add(v);
+        v.start();
+    }
+
+    public void removeVehicle(Vehicle v){
+        vehicles.remove(v);
     }
 
     private boolean isCross(CellType type){
@@ -138,7 +145,7 @@ public class Road {
 
     public Cell cellAtUp(Position pos){
         try{
-            return grid[pos.y + 1][pos.y];
+            return grid[pos.y - 1][pos.y];
         } catch (ArrayIndexOutOfBoundsException ex){
             return null;
         }
@@ -146,7 +153,7 @@ public class Road {
 
     public Cell cellAtDown(Position pos) {
         try {
-            return grid[pos.y - 1][pos.x];
+            return grid[pos.y + 1][pos.x];
         } catch (ArrayIndexOutOfBoundsException ex) {
             return null;
         }

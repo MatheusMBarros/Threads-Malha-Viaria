@@ -7,11 +7,11 @@ import java.util.Random;
 public class Vehicle extends Thread {
     private Road road;
     private Cell cell;
-    private Long speed;
+    private int speed;
     private Color color;
 
 
-    public Vehicle(Road road, long speed, Color color) {
+    public Vehicle(Road road, int speed, Color color) {
         this.road = road;
         this.speed = speed;
         this.color = color;
@@ -21,6 +21,10 @@ public class Vehicle extends Thread {
     public void run() {
         while (road.isActive()) {
             try {
+                if(cell == null){
+                    moveToCell(road.getEmptyEntrance());
+                }
+
                 Cell nextCell = getNextCell();
                 if(nextCell != null){
                     if(nextCell.isCross()){
@@ -29,15 +33,16 @@ public class Vehicle extends Thread {
                     }
                     else{
                         moveToCell(nextCell);
-                        sleep(speed);
                     }
                 }
                 else{
-                    removeFromCell();
+                    sleep(speed);
                     interrupt();
+                    this.removeFromCell();
+                    road.removeVehicle(this);
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                System.out.println("morreu esse");
             }
         }
     }
@@ -51,7 +56,6 @@ public class Vehicle extends Thread {
     }
 
     public void setCell(Cell cell) throws InterruptedException {
-        cell.setVehicleAndLock(this);
         this.cell = cell;
     }
 
@@ -61,7 +65,7 @@ public class Vehicle extends Thread {
             setCell(cell);
             cell.setVehicleAndLock(this);
             if (aux != null) aux.removeVehicleAndRelease();
-            Thread.sleep(speed);
+            sleep(speed);
         }catch (InterruptedException e){
             e.printStackTrace();
         }
@@ -73,7 +77,7 @@ public class Vehicle extends Thread {
             setCell(cell);
             cell.setVehicle(this);
             if (aux != null) aux.removeVehicle();
-            Thread.sleep(speed);
+            sleep(speed);
         }catch (InterruptedException e){
             e.printStackTrace();
         }

@@ -13,16 +13,18 @@ public class SemaphoreCell extends Cell {
         this.semaphore = new Semaphore(1);
     }
 
+    @Override
     public void lock() throws InterruptedException {
         semaphore.acquire();
     }
+
     @Override
     public void release() {
         semaphore.release();
     }
 
     @Override
-    public boolean tryLock() throws InterruptedException {
+    public boolean tryBlock() throws InterruptedException {
         Random rand = new Random();
         return semaphore.tryAcquire(rand.nextInt(500), TimeUnit.MILLISECONDS);
     }

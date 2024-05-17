@@ -12,13 +12,14 @@ public class CrossStrategy {
 
     public CrossStrategy(Road road, Cell c){
         this.road = road;
-        this.cell = cell;
+        this.cell = c;
     }
 
     public void cross(){
         Random random = new Random();
         int option = random.nextInt(3);
         CrossAction routine = getPossibilities().get(cell.getType().getCode())[option];
+        System.out.println(cell.getPosition().y + " - " + cell.getPosition().x);
         routine.doRoutine();
     }
 
@@ -136,8 +137,8 @@ public class CrossStrategy {
         
         try {
             do {
-                boolean blockedA = a.tryLock();
-                boolean blockedB = b.tryLock();
+                boolean blockedA = a.tryBlock();
+                boolean blockedB = b.tryBlock();
                 if (blockedA && blockedB) {
                     if (this.cell instanceof SemaphoreCell) {
                         this.cell.release();
@@ -170,9 +171,9 @@ public class CrossStrategy {
         
         try{
             do {
-                boolean blockedA = a.tryLock();
-                boolean blockedB = b.tryLock();
-                boolean blockedC = c.tryLock();
+                boolean blockedA = a.tryBlock();
+                boolean blockedB = b.tryBlock();
+                boolean blockedC = c.tryBlock();
 
                 if(blockedA && blockedB && blockedC){
                     if (this.cell instanceof SemaphoreCell){
@@ -209,10 +210,10 @@ public class CrossStrategy {
         
         try {
             do {
-                boolean blockedA = a.tryLock();
-                boolean blockedB = b.tryLock();
-                boolean blockedC = c.tryLock();
-                boolean blockedD = d.tryLock();
+                boolean blockedA = a.tryBlock();
+                boolean blockedB = b.tryBlock();
+                boolean blockedC = c.tryBlock();
+                boolean blockedD = d.tryBlock();
 
                 if (blockedA && blockedB && blockedC && blockedD) {
                     if (this.cell instanceof SemaphoreCell){

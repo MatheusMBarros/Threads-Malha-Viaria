@@ -42,7 +42,6 @@ public class RoadView extends JFrame {
 
         };
 
-
         width = (road.getGrid()[0].length * cellWidth) + (road.getGrid()[0].length);
         height = (road.getGrid().length * cellHeight) + (road.getGrid().length);
 
@@ -56,7 +55,7 @@ public class RoadView extends JFrame {
         add(btEnd, BorderLayout.SOUTH);
 
         // Adicionando um Timer para atualizar a interface gráfica periodicamente
-        Timer timer = new Timer(1000, e -> repaint());
+        Timer timer = new Timer(1, e -> repaint());
         timer.start();
     }
 
@@ -95,12 +94,4 @@ public class RoadView extends JFrame {
         new MainView();
     }
 
-//    @Override
-//    public void repaint() {
-//        super.repaint();
-//        Graphics g = getGraphics();
-//        if (g != null) {
-//            drawVehicles(g);
-//        }
-//    }
 }

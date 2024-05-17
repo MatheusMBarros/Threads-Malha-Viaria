@@ -13,16 +13,18 @@ public class MonitorCell extends Cell {
         super(position, type, isEntrance, isCross, isExit);
     }
 
+    @Override
     public void lock(){
         lock.lock();
     }
 
+    @Override
     public void release() {
         lock.unlock();
     }
 
     @Override
-    public boolean tryLock() throws InterruptedException {
+    public boolean tryBlock() throws InterruptedException {
         Random r = new Random();
         return lock.tryLock(r.nextInt(500), TimeUnit.MILLISECONDS);
     }

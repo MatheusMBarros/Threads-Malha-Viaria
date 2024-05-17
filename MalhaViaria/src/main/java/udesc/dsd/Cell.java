@@ -24,6 +24,7 @@ public abstract class Cell {
     public CellType getType(){
         return type;
     }
+
     public Position getPosition(){
         return position;
     }
@@ -66,6 +67,6 @@ public abstract class Cell {
 
     public abstract void lock() throws InterruptedException;
 
-    public abstract boolean tryLock() throws InterruptedException;
+    public abstract boolean tryBlock() throws InterruptedException;
 
 }

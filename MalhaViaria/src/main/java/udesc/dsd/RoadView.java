@@ -3,6 +3,7 @@ package udesc.dsd;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -77,16 +78,22 @@ public class RoadView extends JFrame {
         }
     }
 
-    private void drawVehicles(Graphics g) {
-        for (Vehicle vehicle : road.getVehicles()) {
-            if(vehicle.getCell() != null) {
-                int row = vehicle.getCell().getPosition().y;
-                int col = vehicle.getCell().getPosition().x;
-                int x = col * cellWidth;
-                int y = row * cellHeight;
-                g.setColor(vehicle.getColor());
-                g.fillOval(x, y, cellWidth, cellHeight);
+    private synchronized void drawVehicles(Graphics g) {
+
+        try{
+            for (Vehicle vehicle : road.getVehicles()) {
+                if (vehicle.getCell() != null) {
+                    int row = vehicle.getCell().getPosition().y;
+                    int col = vehicle.getCell().getPosition().x;
+                    int x = col * cellWidth;
+                    int y = row * cellHeight;
+                    g.setColor(vehicle.getColor());
+                    g.fillOval(x, y, cellWidth, cellHeight);
+                }
             }
+        }
+        catch (ConcurrentModificationException e){
+            e.printStackTrace();
         }
     }
 

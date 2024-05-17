@@ -3,8 +3,6 @@ package udesc.dsd;
 import java.util.HashMap;
 import java.util.Random;
 
-import static java.lang.Thread.sleep;
-
 public class CrossStrategy {
 
     private Road road;
@@ -19,11 +17,10 @@ public class CrossStrategy {
         Random random = new Random();
         int option = random.nextInt(3);
         CrossAction routine = getPossibilities().get(cell.getType().getCode())[option];
-        System.out.println(cell.getPosition().y + " - " + cell.getPosition().x);
         routine.doRoutine();
     }
 
-    private void fromUpToRight(){
+    private void fromDownToRight(){
         Cell a = road.cellAtUp(cell.getPosition());
         Cell b = road.cellAtRight(a.getPosition());
 
@@ -31,7 +28,7 @@ public class CrossStrategy {
         else tryCross(a, b);
     }
 
-    private void fromUpToUp(){
+    private void fromDownToUp(){
         Cell a = road.cellAtUp(cell.getPosition());
         Cell b = road.cellAtUp(a.getPosition());
         Cell c = road.cellAtUp(b.getPosition());
@@ -40,7 +37,7 @@ public class CrossStrategy {
         else tryCross(a, b, c);
     }
 
-    private void fromUpToLeft(){
+    private void fromDownToLeft(){
         Cell a = road.cellAtUp(cell.getPosition());
         Cell b = road.cellAtUp(a.getPosition());
         Cell c = road.cellAtLeft(b.getPosition());
@@ -50,7 +47,7 @@ public class CrossStrategy {
         else tryCross(a, b, c, d);
     }
 
-    private void fromRightToDown(){
+    private void fromLeftToDown(){
         Cell a = road.cellAtRight(cell.getPosition());
         Cell b = road.cellAtDown(a.getPosition());
 
@@ -58,7 +55,7 @@ public class CrossStrategy {
         else tryCross(a, b);
     }
 
-    private void fromRightToRight(){
+    private void fromLeftToRight(){
         Cell a = road.cellAtRight(cell.getPosition());
         Cell b = road.cellAtRight(a.getPosition());
         Cell c = road.cellAtRight(b.getPosition());
@@ -67,7 +64,7 @@ public class CrossStrategy {
         else tryCross(a, b, c);
     }
 
-    private void fromRightToUp(){
+    private void fromLeftToUp(){
         Cell a = road.cellAtRight(cell.getPosition());
         Cell b = road.cellAtRight(a.getPosition());
         Cell c = road.cellAtUp(b.getPosition());
@@ -77,14 +74,14 @@ public class CrossStrategy {
         else tryCross(a, b, c, d);
     }
 
-    private void fromLeftToUp(){
+    private void fromRightToUp(){
         Cell a = road.cellAtLeft(cell.getPosition());
         Cell b = road.cellAtUp(a.getPosition());
         if(a.isCrossEnd()) cross();
         else tryCross(a, b);
     }
 
-    private void fromLeftToLeft(){
+    private void fromRightToLeft(){
         Cell a = road.cellAtLeft(cell.getPosition());
         Cell b = road.cellAtLeft(a.getPosition());
         Cell c = road.cellAtLeft(b.getPosition());
@@ -93,7 +90,7 @@ public class CrossStrategy {
         else tryCross(a, b, c);
     }
 
-    private void fromLeftToDown(){
+    private void fromRightToDown(){
         Cell a = road.cellAtLeft(cell.getPosition());
         Cell b = road.cellAtLeft(a.getPosition());
         Cell c = road.cellAtDown(b.getPosition());
@@ -103,7 +100,7 @@ public class CrossStrategy {
         else tryCross(a, b, c, d);
     }
 
-    private void fromDownToLeft(){
+    private void fromUpToLeft(){
         Cell a = road.cellAtDown(cell.getPosition());
         Cell b = road.cellAtLeft(a.getPosition());
 
@@ -111,7 +108,7 @@ public class CrossStrategy {
         else tryCross(a, b);
     }
 
-    private void fromDownToDown(){
+    private void fromUpToDown(){
         Cell a = road.cellAtDown(cell.getPosition());
         Cell b = road.cellAtDown(a.getPosition());
         Cell c = road.cellAtDown(b.getPosition());
@@ -120,7 +117,7 @@ public class CrossStrategy {
         else tryCross(a, b, c);
     }
 
-    private void fromDownToRight(){
+    private void fromUpToRight(){
         Cell a = road.cellAtDown(cell.getPosition());
         Cell b = road.cellAtDown(a.getPosition());
         Cell c = road.cellAtRight(b.getPosition());
@@ -155,7 +152,6 @@ public class CrossStrategy {
                 } else {
                     if (blockedA) a.release();
                     if (blockedB) b.release();
-                    sleep(r.nextLong(500));
                 }
             } while (!gone);
 
@@ -194,7 +190,6 @@ public class CrossStrategy {
                     if (blockedA) a.release();
                     if (blockedB) b.release();
                     if (blockedC) c.release();
-                    sleep(r.nextLong(500));
                 }
             } while (!gone);
 
@@ -239,7 +234,6 @@ public class CrossStrategy {
                     if (blockedB) b.release();
                     if (blockedC) c.release();
                     if (blockedD) d.release();
-                    sleep(r.nextLong(500));
                 }
             } while (!gone);
 
@@ -252,27 +246,27 @@ public class CrossStrategy {
         HashMap<Integer, CrossAction[]> possibilities = new HashMap<>();
 
         possibilities.put(1, new CrossAction[]{
-                this::fromUpToRight,
-                this::fromUpToUp,
-                this::fromUpToLeft
+                this::fromDownToRight,
+                this::fromDownToUp,
+                this::fromDownToLeft
         });
 
         possibilities.put(2, new CrossAction[]{
-                this::fromRightToDown,
-                this::fromRightToRight,
-                this::fromRightToUp
+                this::fromLeftToDown,
+                this::fromLeftToRight,
+                this::fromLeftToUp
         });
 
         possibilities.put(3, new CrossAction[]{
-                this::fromDownToLeft,
-                this::fromDownToDown,
-                this::fromDownToRight
+                this::fromUpToLeft,
+                this::fromUpToDown,
+                this::fromUpToRight
         });
 
         possibilities.put(4, new CrossAction[]{
-                this::fromLeftToUp,
-                this::fromLeftToLeft,
-                this::fromLeftToDown
+                this::fromRightToUp,
+                this::fromRightToLeft,
+                this::fromRightToDown
         });
 
         return possibilities;

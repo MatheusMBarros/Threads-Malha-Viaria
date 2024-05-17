@@ -42,7 +42,7 @@ public class Vehicle extends Thread {
                     road.removeVehicle(this);
                 }
             } catch (InterruptedException e) {
-                System.out.println("morreu esse");
+                e.printStackTrace();
             }
         }
     }

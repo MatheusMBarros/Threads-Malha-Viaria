@@ -95,12 +95,12 @@ public class Road {
         }
     }
 
-    public void addVehicle(Vehicle v) throws InterruptedException {
+    public synchronized void addVehicle(Vehicle v) throws InterruptedException {
         v.start();
         vehicles.add(v);
     }
 
-    public void removeVehicle(Vehicle v){
+    public synchronized void removeVehicle(Vehicle v){
         vehicles.remove(v);
     }
 
@@ -140,7 +140,7 @@ public class Road {
 
     public Cell cellAtUp(Position pos){
         try{
-            return grid[pos.y - 1][pos.y];
+            return grid[pos.y - 1][pos.x];
         } catch (ArrayIndexOutOfBoundsException ex){
             return null;
         }
